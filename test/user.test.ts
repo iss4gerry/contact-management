@@ -38,3 +38,54 @@ describe('POST /api/users', () => {
         expect(response.body.data.name).toBe('test')
     })
 })
+
+describe('POST /api/users/login', () => {
+    beforeEach(async ()=> {
+        await UserTest.create()
+    })
+
+    afterEach(async () => {
+        await UserTest.delete()
+    })
+
+    it('should be able to login', async () => {
+        const response = await supertest(app)
+            .post('/api/users/login')
+            .send({
+                username: 'test',
+                password: 'test'
+            })
+
+        logger.debug(response.body)
+        expect(response.status).toBe(200)
+        expect(response.body.data.username).toBe('test')
+        expect(response.body.data.name).toBe('test')
+        expect(response.body.data.token).toBeDefined()
+    })
+
+    it('should reject login if username is wrong', async () => {
+        const response = await supertest(app)
+            .post('/api/users/login')
+            .send({
+                username: 'salah',
+                password: 'test'
+            })
+
+        logger.debug(response.body)
+        expect(response.status).toBe(401)
+        expect(response.body.errors).toBeDefined()
+    })
+
+    it('should reject login if password is wrong', async () => {
+        const response = await supertest(app)
+            .post('/api/users/login')
+            .send({
+                username: 'test',
+                password: 'salah'
+            })
+
+        logger.debug(response.body)
+        expect(response.status).toBe(401)
+        expect(response.body.errors).toBeDefined()
+    })
+})
